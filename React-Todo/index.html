@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TODO-APP</title>
+    <!-- React -->
+    <script crossorigin src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">    <!-- Babel -->
+    <!-- babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+   
+     <div id="root">
+     </div>
+ 
+     <!-- script -->
+     <script type="text/babel">
+  
+    const App = () => {
+  const [todos, setTodos] = React.useState([]);
+  const [todo, setTodo] = React.useState("");
+  const [todoEditing, setTodoEditing] = React.useState(null);
+  const [editingText, setEditingText] = React.useState("");
+
+  React.useEffect(() => {
+    const json = localStorage.getItem("todos");
+    const loadedTodos = JSON.parse(json);
+    if (loadedTodos) {
+      setTodos(loadedTodos);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    const json = JSON.stringify(todos);
+    localStorage.setItem("todos", json);
+  }, [todos]);
+
+  function handleSubmit(e) {
+    e.preventDefault();
+
+    const newTodo = {
+      id: new Date().getTime(),
+      text: todo,
+      completed: false,
+    };
+    setTodos([...todos].concat(newTodo));
+    setTodo("");
+  }
+
+  function deleteTodo(id) {
+    let updatedTodos = [...todos].filter((todo) => todo.id !== id);
+    setTodos(updatedTodos);
+  }
+
+  function toggleComplete(id) {
+    let updatedTodos = [...todos].map((todo) => {
+      if (todo.id === id) {
+        todo.completed = !todo.completed;
+      }
+      return todo;
+    });
+    setTodos(updatedTodos);
+  }
+
+  function submitEdits(id) {
+    const updatedTodos = [...todos].map((todo) => {
+      if (todo.id === id) {
+        todo.text = editingText;
+      }
+      return todo;
+    });
+    setTodos(updatedTodos);
+    setTodoEditing(null);
+  }
+
+  return (
+    <div id="todo-list">
+      <h1>TODO List</h1>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          onChange={(e) => setTodo(e.target.value)}
+          value={todo}
+        />
+        <button type="submit">Add Todo</button>
+      </form>
+      {todos.map((todo) => (
+        <div key={todo.id} className="todo">
+          <div className="todo-text">
+            <input
+              type="checkbox"
+              id="completed"
+              checked={todo.completed}
+              onChange={() => toggleComplete(todo.id)}
+            />
+            {todo.id === todoEditing ? (
+              <input
+                type="text"
+                onChange={(e) => setEditingText(e.target.value)}
+              />
+            ) : (
+              <div>{todo.text}</div>
+            )}
+          </div>
+          <div className="todo-actions">
+            {todo.id === todoEditing ? (
+              <button onClick={() => submitEdits(todo.id)}>Update</button>
+            ) : (
+              <button onClick={() => setTodoEditing(todo.id)}>Edit</button>
+            )}
+
+            <button onClick={() => deleteTodo(todo.id)}>Delete</button>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+    ReactDOM.render(<App/>,root)
