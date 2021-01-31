@@ -49,7 +49,8 @@
       text: todo,
       completed: false,
     };
-    setTodos([...todos].concat(newTodo));
+    if(newTodo.text!=""){
+    setTodos([...todos].concat(newTodo));}
     setTodo("");
   }
 
